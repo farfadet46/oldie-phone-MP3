@@ -26,10 +26,8 @@ void printDetail(uint8_t type, int value);
 #include "keypad_config.h"
 //initialize an instance of class NewKeypad
 Adafruit_Keypad kpd = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-//Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-#define NUM_SONGS 16
-String SONGS[NUM_SONGS] = {"1500","1600","1700","1963","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","2006"};
 
+char key ="";
 char CODE_ENTERED[4];
 int CODE_COUNTER = 0;
 
@@ -37,13 +35,10 @@ int CODE_COUNTER = 0;
 //1 – proximity triggered, ringing
 //2 – in use
 //3 – hangup, idle for XXXXms
-int MODE = 0;
+//int MODE = 0;
 int DEBUG = true;
 
-long MODE_1_TIMER_START;
-long MODE_1_DURATION = 5000; //rings for 5s
-
-bool REPLAY_MODE = true; 
+//bool REPLAY_MODE = true; 
 bool TIMEOUT_DIGIT = false;
 bool PLAYED_A_SONG = false;
 long MODE_2_TIMER_DIGIT_START;
@@ -53,16 +48,13 @@ long MODE_3_TIMER_START;
 long MODE_3_DURATION = 5000; //idle for 5s after hangup
 
 
-int VOL_SPEAKER = 10;
+int VOL_SPEAKER = 50;
 float VOL_SPEAKER_MULTIPLIER = 1.0; //0.0-3.0 (-= 0.5 each time)
-int VOL_HEADSET = 28;
-
-bool BROADCAST = false;
 
 void setup() {
   mySoftwareSerial.begin(9600);
   
-  //myDFPlayer.volume(5);
+  myDFPlayer.volume(VOL_SPEAKER);
   
   Serial.begin(115200);
   if (!myDFPlayer.begin(mySoftwareSerial, false)) {  //Use softwareSerial to communicate with mp3.
@@ -95,147 +87,99 @@ void loop() {
     else if(e.bit.EVENT == KEY_JUST_RELEASED) {
       Serial.println(" released");
       
-      //myDFPlayer.play("1234.mp3");
-       myDFPlayer.stop();
-       //myDFPlayer.randomAll(); 
-       myDFPlayer.playMp3Folder(1983);
-      Serial.println("ecoute 1983.mp3 situé dans le dossier MP3 !");
+      // myDFPlayer.playMp3Folder(1983);
+      //Serial.println("ecoute 1983.mp3 situé dans le dossier MP3 !");
+      key = char(e.bit.KEY);
+      keypad_to_song();
       }
   }
-
   delay(10);
 }
 
 void keypad_to_song(){
-  /*
-  //if(DEBUG==true){Serial.println("key");}
   
-  char key = "1";
-  /*
-  if(key=='#'){ //increase volume
-
-    if(DEBUG==true){Serial.println("#");}
-
-    VOL_SPEAKER_MULTIPLIER -= 0.5;
-    if(VOL_SPEAKER_MULTIPLIER<0){VOL_SPEAKER_MULTIPLIER=3.0;}
-    VOL_SPEAKER = int(10.0*VOL_SPEAKER_MULTIPLIER);
-    VOL_HEADSET = VOL_SPEAKER + 20;
-
-    if(DEBUG==true){Serial.print(VOL_SPEAKER);Serial.print(",");Serial.print(VOL_HEADSET);Serial.println();}
-
-    if(BROADCAST==true){
-      //musicPlayer.setVolume(VOL_HEADSET,VOL_SPEAKER); //handset. speaker. 
-      musicPlayer.setVolume(VOL_SPEAKER,VOL_HEADSET); 
-    }else{
-      //musicPlayer.setVolume(VOL_HEADSET,100); //handset. speaker off. 
-      musicPlayer.setVolume(100,VOL_HEADSET);
-    }
+  //char key = "1";
+  
+  
+  if(key=='#'){
+    //reset le 4 digit !
+    
+    CODE_COUNTER = 0;
+    TIMEOUT_DIGIT = false;
+    Serial.println("Restart ! OK");
+    //jouer un son explicite de RAZ !
+    myDFPlayer.playMp3Folder(1);
     
   }
-  if(key=='*'){ //toggle broadcast
-    
-    BROADCAST = !BROADCAST;
-
-    if(BROADCAST==true){
-      //musicPlayer.setVolume(VOL_HEADSET,VOL_SPEAKER); //handset. speaker.  
-      musicPlayer.setVolume(VOL_SPEAKER,VOL_HEADSET);
-    }else{
-      //musicPlayer.setVolume(VOL_HEADSET,100); //handset. speaker off. 
-      musicPlayer.setVolume(100,VOL_HEADSET); //handset. speaker off. 
-    }
-    
+  if(key=='*'){
+    myDFPlayer.playMp3Folder(1);
   }
-
   if(key=='1'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t1.mp3");
+    myDFPlayer.playMp3Folder(11);
     CODE_ENTERED[CODE_COUNTER] = '1';
+    Serial.println("OH un 1 !");
   }
   if(key=='2'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t2.mp3");
+   myDFPlayer.playMp3Folder(12);
     CODE_ENTERED[CODE_COUNTER] = '2';
+    Serial.println("OH un 2 !");
   }
   if(key=='3'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t3.mp3");
+    myDFPlayer.playMp3Folder(13);
     CODE_ENTERED[CODE_COUNTER] = '3';
   }
   if(key=='4'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t4.mp3");
+    myDFPlayer.playMp3Folder(14);
     CODE_ENTERED[CODE_COUNTER] = '4';
   }
   if(key=='5'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t5.mp3");
+    myDFPlayer.playMp3Folder(15);
     CODE_ENTERED[CODE_COUNTER] = '5';
   }
   if(key=='6'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t6.mp3");
+    myDFPlayer.playMp3Folder(16);
     CODE_ENTERED[CODE_COUNTER] = '6';
   }
   if(key=='7'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t7.mp3");
+    myDFPlayer.playMp3Folder(17);
     CODE_ENTERED[CODE_COUNTER] = '7';
   }
   if(key=='8'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t8.mp3");
+    myDFPlayer.playMp3Folder(18);
     CODE_ENTERED[CODE_COUNTER] = '8';
   }
   if(key=='9'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t9.mp3");
+    myDFPlayer.playMp3Folder(19);
     CODE_ENTERED[CODE_COUNTER] = '9';
   }
   if(key=='0'){
-    musicPlayer.stopPlaying();
-    musicPlayer.playFullFile("t0.mp3");
+    myDFPlayer.playMp3Folder(10);
     CODE_ENTERED[CODE_COUNTER] = '0';
   }
   if(key=='0'||key=='1'||key=='2'||key=='3'||key=='4'||key=='5'||key=='6'||key=='7'||key=='8'||key=='9'){
-    MODE_2_TIMER_DIGIT_START = millis(); TIMEOUT_DIGIT = true; REPLAY_MODE = false; PLAYED_A_SONG = false; 
-    CODE_COUNTER++; if(CODE_COUNTER==4){code_entered();}
+    MODE_2_TIMER_DIGIT_START = millis();
+    TIMEOUT_DIGIT = true;
+   // PLAYED_A_SONG = false;
+    CODE_COUNTER++;
+    if(CODE_COUNTER==4){
+      //si on est à 4 chiffre entré, on passe a la suite
+      code_entered();
+    }
   }
-  */
 }
 
 
 void code_entered(){
-  /*
+  
+   // LECTURE DE LA MUSIQUE ENTREE
+   
   TIMEOUT_DIGIT = false;
-
-  String code_4 = String(CODE_ENTERED[0]) + String(CODE_ENTERED[1]) + String(CODE_ENTERED[2]) + String(CODE_ENTERED[3]);
-
-  bool song_was_found = false;
-  for(int i=0;i<NUM_SONGS;i++){
-    if(code_4 == SONGS[i]){
-      
-      song_was_found = true;
-
-      CODE_COUNTER = 0;
-      TIMEOUT_DIGIT = false;
-      
-      if(DEBUG==true){Serial.println("Song Found...");Serial.println(SONGS[i]+".mp3");}
-      
-      String s = SONGS[i]+".mp3";
-      char filename[9]; //learned the hard way about null termination. fuk you C! 
-      s.toCharArray(filename, 9);
-      musicPlayer.startPlayingFile(filename); 
-      
-      PLAYED_A_SONG = true;
-    }
-  }
-
-  if(song_was_found == false){
-    CODE_COUNTER = 0;
-    TIMEOUT_DIGIT = false;
-    musicPlayer.startPlayingFile("sorry2.mp3");  
-  }
-*/
+  CODE_COUNTER = 0;
+  
+  int code_4 = (CODE_ENTERED[0]) + (CODE_ENTERED[1]) + (CODE_ENTERED[2]) + (CODE_ENTERED[3]);
+  Serial.println(code_4);
+  myDFPlayer.playMp3Folder(code_4);
+  PLAYED_A_SONG = true;
 }
 
 void play_song(String song){
